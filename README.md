@@ -93,3 +93,36 @@ var greet = require('./greet');
 greet.greet();
 ```
 This example is a very common and clean way to struture and protect code within modules, it is called revealing module pattern: exposing only the properties and methods you want via an returned object.
+
+## *exports* vs *module.exports*
+When a code is run through node, is wrapped in a function expression:
+```javascript
+(function (exports, require, module, __filename, __dirname) {
+  var greet = function() {
+    console.log('Hello');
+  };
+  module.exports = greet;
+});
+```
+When the function is executed:
+```javascript
+fn(module.exports, require, module, filename, dirname);
+```
+Actually, *exports* is shorthand to module.exports, it's two variable pointing to the same object in memory. But why not just use *exports* all the time? Well, the *require* function returns *module.exports*, so it's returing the propery on *module* object. However, if we replace *module.exports* with *exports*:
+```javascript
+exports = function() {
+  console.log('Hello');
+}
+console.log(exports);        // [Function]
+console.log(module.exports); // {}
+```
+Initially, *module.exports* is pointing to the an empty object that is setup for us, and when the function expression is invoked, *module.exports* is passed the variable *exports*. They still both point to the same memory location. That is pass by reference. However, equlas (=) operator sets up new address, so when assign *exports* to some value, it points to a new memory address, the reference is broken. 
+
+Use of mutation can make this work:
+```javascript
+exports.greet = function() {
+  console.log('Hello');
+}
+console.log(exports);        // { greet: [Function] }
+console.log(module.exports); // { greet: [Function] }
+```
